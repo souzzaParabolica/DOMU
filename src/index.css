@@ -13,7 +13,7 @@
 
   /* Light theme surfaces & text (never pure white/black) */
   --bg-page: var(--domu-cream-2);
-  --bg-surface: rgb(249, 249, 249);
+  --bg-surface: rgb(255, 255, 255, 0.9);
   --bg-surface-soft: rgba(251, 241, 205, 0.6);
   --bg-inset: rgba(1, 1, 1, 0.06);
   --text-strong: rgba(1, 1, 1, 0.9);
@@ -25,7 +25,7 @@
 
 .dark {
   --bg-page: var(--domu-black-2);
-  --bg-surface: rgb(249, 249, 249);
+  --bg-surface: rgb(255, 255, 255, 0.8);
   --bg-surface-soft: rgba(255, 255, 255, 0.05);
   --bg-inset: rgba(255, 255, 255, 0.09);
   --text-strong: rgba(255, 255, 255, 0.9);
