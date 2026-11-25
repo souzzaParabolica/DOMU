@@ -1,5 +1,19 @@
-import { useState } from 'react';
-import { Home, Wallet, CalendarDays, MessageSquare, LayoutDashboard } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  Home,
+  Wallet,
+  CalendarDays,
+  MessageSquare,
+  LayoutDashboard,
+  Package,
+  IdCard,
+  ClipboardList,
+  Search,
+  Users,
+  ShieldCheck,
+  Receipt,
+  Megaphone,
+} from 'lucide-react';
 import { useStore } from '../store';
 import { TopBar } from './TopBar';
 import ResidentDashboard from './ResidentDashboard';
@@ -18,6 +32,7 @@ import EmitirBoletos from './EmitirBoletos';
 import SindicoOcorrencias from './SindicoOcorrencias';
 import GerenciarProgramacao from './GerenciarProgramacao';
 import Chat from './Chat';
+import PortariaPainel from './PortariaPainel';
 import PortariaEncomendas from './PortariaEncomendas';
 import PortariaVisitantes from './PortariaVisitantes';
 import ConsultaRapida from './ConsultaRapida';
@@ -32,21 +47,21 @@ interface NavItem {
 const NAV: Record<Profile, NavItem[]> = {
   morador: [
     { id: 'inicio', label: 'Início', icon: Home },
-    { id: 'encomendas', label: 'Entregas', icon: Home },
+    { id: 'encomendas', label: 'Entregas', icon: Package },
     { id: 'reservas', label: 'Reservas', icon: CalendarDays },
     { id: 'financeiro', label: 'Financeiro', icon: Wallet },
   ],
   sindico: [
     { id: 'painel', label: 'Painel', icon: LayoutDashboard },
-    { id: 'ocorrencias', label: 'Ocorrências', icon: MessageSquare },
-    { id: 'boletos', label: 'Boletos', icon: Wallet },
+    { id: 'ocorrencias', label: 'Ocorrências', icon: Megaphone },
+    { id: 'boletos', label: 'Boletos', icon: Receipt },
     { id: 'chat-portaria', label: 'Portaria', icon: MessageSquare },
   ],
   portaria: [
-    { id: 'p-encomendas', label: 'Encomendas', icon: Home },
-    { id: 'p-visitantes', label: 'Visitantes', icon: Home },
-    { id: 'p-consulta', label: 'Consulta', icon: Home },
-    { id: 'chat-portaria', label: 'Síndico', icon: MessageSquare },
+    { id: 'p-painel', label: 'Início', icon: LayoutDashboard },
+    { id: 'p-encomendas', label: 'Encomendas', icon: Package },
+    { id: 'p-visitantes', label: 'Visitantes', icon: IdCard },
+    { id: 'p-consulta', label: 'Consulta', icon: Search },
   ],
 };
 
@@ -67,21 +82,25 @@ const MAIS: Record<Profile, { id: string; label: string }[]> = {
   portaria: [],
 };
 
+const TAB_INICIAL: Record<Profile, string> = {
+  morador: 'inicio',
+  sindico: 'painel',
+  portaria: 'p-painel',
+};
+
 export default function AppShell({ onSair }: { onSair: () => void }) {
   const { state } = useStore();
-  const [tab, setTab] = useState('inicio');
+  const [tab, setTab] = useState(TAB_INICIAL[state.perfilAtivo]);
 
   const perfil = state.perfilAtivo;
 
-  // Reset tab when switching profiles
-  const tabInicial: Record<Profile, string> = {
-    morador: 'inicio',
-    sindico: 'painel',
-    portaria: 'p-encomendas',
-  };
-  const abaAtual = NAV[perfil].some((n) => n.id === tab) || MAIS[perfil].some((m) => m.id === tab)
-    ? tab
-    : tabInicial[perfil];
+  useEffect(() => {
+    setTab(TAB_INICIAL[perfil]);
+  }, [perfil]);
+
+  const valido =
+    NAV[perfil].some((n) => n.id === tab) || MAIS[perfil].some((m) => m.id === tab);
+  const abaAtual = valido ? tab : TAB_INICIAL[perfil];
 
   const go = (id: string) => setTab(id);
 
@@ -147,6 +166,8 @@ export default function AppShell({ onSair }: { onSair: () => void }) {
       }
     }
     switch (abaAtual) {
+      case 'p-painel':
+        return <PortariaPainel go={go} />;
       case 'p-encomendas':
         return <PortariaEncomendas />;
       case 'p-visitantes':
@@ -163,14 +184,11 @@ export default function AppShell({ onSair }: { onSair: () => void }) {
           />
         );
       default:
-        return <PortariaEncomendas />;
+        return <PortariaPainel go={go} />;
     }
   };
 
-  const iconFor = (id: string): typeof Home => {
-    const item = NAV[perfil].find((n) => n.id === id);
-    return item?.icon ?? Home;
-  };
+  const maisAtivo = MAIS[perfil].some((m) => m.id === abaAtual);
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-lg px-4 pb-24 lg:max-w-3xl">
@@ -202,10 +220,11 @@ export default function AppShell({ onSair }: { onSair: () => void }) {
           <button
             onClick={() => go(MAIS[perfil][0].id)}
             aria-label="Mais funcionalidades"
+            aria-current={maisAtivo ? 'page' : undefined}
             className="flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold"
-            style={{ color: MAIS[perfil].some((m) => m.id === abaAtual) ? '#FE4E02' : 'var(--text-muted)' }}
+            style={{ color: maisAtivo ? '#FE4E02' : 'var(--text-muted)' }}
           >
-            <Home size={20} />
+            <ClipboardList size={20} />
             Mais
           </button>
         )}

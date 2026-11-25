@@ -13,12 +13,11 @@ const PERFIS: {
   { id: 'portaria', nome: 'Portaria', desc: 'Controle de acesso e entregas', icon: Building2 },
 ];
 
-export default function Login() {
-  const { state, setPerfil, toggleTema } = useStore();
+export default function Login({ onEntrar }: { onEntrar: (perfil: Profile) => void }) {
+  const { toggleTema } = useStore();
 
   const entrar = (perfil: Profile) => {
-    const primeiroMorador = state.residents[0];
-    setPerfil(perfil, primeiroMorador?.id);
+    onEntrar(perfil);
   };
 
   return (

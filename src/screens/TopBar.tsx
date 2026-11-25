@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Building2, Eclipse, Bell, ChevronDown, RotateCcw, LogOut, Check } from 'lucide-react';
+import { Eclipse, Bell, ChevronDown, RotateCcw, LogOut, Check } from 'lucide-react';
 import { useStore } from '../store';
 import { Button, Modal } from '../components/ui';
 import { formatDataHora } from '../lib/format';
@@ -12,8 +12,14 @@ const perfilNomes: Record<Profile, string> = {
 };
 
 export function TopBar({ onSair }: { onSair: () => void }) {
-  const { state, toggleTema, setPerfil, marcarNotificacoesLidas, limparNotificacoes, restaurarDemo } =
-    useStore();
+  const {
+    state,
+    toggleTema,
+    setPerfil,
+    marcarNotificacoesLidas,
+    limparNotificacoes,
+    restaurarDemo,
+  } = useStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
@@ -25,24 +31,34 @@ export function TopBar({ onSair }: { onSair: () => void }) {
   const notifs = state.notifications.filter(
     (n) =>
       n.targetProfile === state.perfilAtivo &&
-      (!n.targetUnidadeId || state.perfilAtivo !== 'morador' || n.targetUnidadeId === eu?.unidadeId),
+      (!n.targetUnidadeId ||
+        state.perfilAtivo !== 'morador' ||
+        n.targetUnidadeId === eu?.unidadeId),
   );
   const naoLidas = notifs.filter((n) => !n.lida).length;
 
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+    const onClick = (e: Event) => {
+      const alvo = e.target as Node;
+      if (menuRef.current && !menuRef.current.contains(alvo)) setMenuOpen(false);
+      if (notifRef.current && !notifRef.current.contains(alvo)) setNotifOpen(false);
     };
     document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
+    document.addEventListener('touchstart', onClick);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('touchstart', onClick);
+    };
   }, []);
 
+  const restaurar = () => {
+    setDemoOpen(false);
+    restaurarDemo();
+    onSair();
+  };
+
   return (
-    <header className="surface sticky top-0 z-30 mb-4 flex items-center gap-2 rounded-b-2xl px-4 py-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FE4E02]" aria-hidden="true">
-        <Building2 size={18} className="text-[rgba(255,255,255,0.9)]" />
-      </div>
+    <header className="surface sticky top-0 z-30 mb-4 flex items-center gap-1.5 rounded-b-2xl px-3 py-2.5 sm:gap-2 sm:px-4 sm:py-3">
       <span className="text-lg font-extrabold tracking-tight text-strong">DOMU</span>
 
       <div className="flex-1" />
@@ -50,7 +66,7 @@ export function TopBar({ onSair }: { onSair: () => void }) {
       <button
         onClick={toggleTema}
         aria-label="Alternar tema claro/escuro"
-        className="rounded-full p-2.5 text-strong hover:text-[#FE4E02]"
+        className="rounded-full p-2 text-strong hover:text-[#FE4E02]"
       >
         <Eclipse size={19} />
       </button>
@@ -63,16 +79,19 @@ export function TopBar({ onSair }: { onSair: () => void }) {
             if (abrindo && naoLidas > 0) marcarNotificacoesLidas(state.perfilAtivo);
           }}
           aria-label="Notificações"
-          className="relative rounded-full p-2.5 text-strong hover:text-[#FE4E02]"
+          className="relative rounded-full p-2 text-strong hover:text-[#FE4E02]"
         >
           <Bell size={19} />
           {naoLidas > 0 && (
-            <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#FE4E02]" aria-hidden="true" />
+            <span
+              className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#FE4E02]"
+              aria-hidden="true"
+            />
           )}
         </button>
         {notifOpen && (
           <div
-            className="surface absolute right-0 top-11 w-72 rounded-2xl p-3"
+            className="surface fixed right-2 top-14 w-[calc(100vw-1.5rem)] max-w-72 rounded-2xl p-3 sm:absolute sm:right-0 sm:top-11 sm:w-72"
             style={{ background: 'var(--bg-page)' }}
           >
             <div className="mb-2 flex items-center justify-between">
@@ -102,14 +121,14 @@ export function TopBar({ onSair }: { onSair: () => void }) {
           onClick={() => setMenuOpen((o) => !o)}
           aria-label="Menu de perfil"
           aria-expanded={menuOpen}
-          className="surface-soft flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold text-strong"
+          className="surface-soft flex items-center gap-1 rounded-full px-2.5 py-2 text-xs font-bold text-strong sm:px-3 sm:text-sm"
         >
           {perfilNomes[state.perfilAtivo]}
           <ChevronDown size={14} />
         </button>
         {menuOpen && (
           <div
-            className="surface absolute right-0 top-11 w-56 rounded-2xl p-2"
+            className="surface fixed right-2 top-14 w-56 rounded-2xl p-2 sm:absolute sm:right-0 sm:top-11"
             style={{ background: 'var(--bg-page)' }}
           >
             <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-muted">
@@ -157,15 +176,7 @@ export function TopBar({ onSair }: { onSair: () => void }) {
           <Button variant="secondary" className="flex-1" onClick={() => setDemoOpen(false)}>
             Cancelar
           </Button>
-          <Button
-            variant="danger"
-            className="flex-1"
-            onClick={() => {
-              restaurarDemo();
-              setDemoOpen(false);
-              onSair();
-            }}
-          >
+          <Button variant="danger" className="flex-1" onClick={restaurar}>
             Restaurar
           </Button>
         </div>
