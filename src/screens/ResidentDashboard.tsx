@@ -16,9 +16,11 @@ import { useStore } from '../store';
 import { Card, DecorIcon, Badge } from '../components/ui';
 import { formatBRL, formatDataHora } from '../lib/format';
 
-export default function ResidentDashboard({ go }: { go: (tab: string) => void }) {
+export default function ResidentDashboard({ go, nomeUsuario }: { go: (tab: string) => void; nomeUsuario: string }) {
   const { state, toggleOcultarValores } = useStore();
   const eu = state.residents.find((r) => r.id === state.moradorAtualId);
+  const nomeExibicao = nomeUsuario.trim() || 'Morador';
+  const iniciais = nomeExibicao.split(/\s+/).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase();
   const [notifOpen, setNotifOpen] = useState(false);
 
   const minhasNotifs = useMemo(
@@ -67,10 +69,10 @@ export default function ResidentDashboard({ go }: { go: (tab: string) => void })
           className="flex h-12 w-12 items-center justify-center rounded-full font-bold text-[rgba(255,255,255,0.9)]"
           style={{ background: 'linear-gradient(135deg, #FE4E02, #EA5C29)' }}
         >
-          {eu?.avatarSeed}
+          {iniciais}
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-extrabold text-strong">Opa, {eu?.nome}</h1>
+          <h1 className="truncate text-xl font-extrabold text-strong">Opa, {nomeExibicao}</h1>
           <p className="text-sm text-muted">
             Apto {eu?.apartamento} {eu?.bloco}
           </p>

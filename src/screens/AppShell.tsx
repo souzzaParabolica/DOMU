@@ -37,6 +37,7 @@ import PortariaEncomendas from './PortariaEncomendas';
 import PortariaVisitantes from './PortariaVisitantes';
 import ConsultaRapida from './ConsultaRapida';
 import type { Profile } from '../types';
+import type { UserProfile } from '../lib/supabase';
 
 interface NavItem {
   id: string;
@@ -88,7 +89,7 @@ const TAB_INICIAL: Record<Profile, string> = {
   portaria: 'p-painel',
 };
 
-export default function AppShell({ onSair }: { onSair: () => void }) {
+export default function AppShell({ nomeUsuario, onSair }: { nomeUsuario: UserProfile['nome']; onSair: () => void }) {
   const { state } = useStore();
   const [tab, setTab] = useState(TAB_INICIAL[state.perfilAtivo]);
 
@@ -108,7 +109,7 @@ export default function AppShell({ onSair }: { onSair: () => void }) {
     if (perfil === 'morador') {
       switch (abaAtual) {
         case 'inicio':
-          return <ResidentDashboard go={go} />;
+          return <ResidentDashboard go={go} nomeUsuario={nomeUsuario} />;
         case 'financeiro':
           return <Financeiro />;
         case 'reservas':
@@ -124,7 +125,7 @@ export default function AppShell({ onSair }: { onSair: () => void }) {
         case 'programacao':
           return <Programacao />;
         default:
-          return <ResidentDashboard go={go} />;
+          return <ResidentDashboard go={go} nomeUsuario={nomeUsuario} />;
       }
     }
     if (perfil === 'sindico') {

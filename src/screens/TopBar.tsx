@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Eclipse, Bell, ChevronDown, RotateCcw, LogOut, Check } from 'lucide-react';
+import { Eclipse, Bell, LogOut } from 'lucide-react';
 import { useStore } from '../store';
-import { Button, Modal } from '../components/ui';
 import { formatDataHora } from '../lib/format';
 import type { Profile } from '../types';
 
@@ -15,15 +14,10 @@ export function TopBar({ onSair }: { onSair: () => void }) {
   const {
     state,
     toggleTema,
-    setPerfil,
     marcarNotificacoesLidas,
     limparNotificacoes,
-    restaurarDemo,
   } = useStore();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [demoOpen, setDemoOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   const eu = state.residents.find((r) => r.id === state.moradorAtualId);
@@ -40,7 +34,6 @@ export function TopBar({ onSair }: { onSair: () => void }) {
   useEffect(() => {
     const onClick = (e: Event) => {
       const alvo = e.target as Node;
-      if (menuRef.current && !menuRef.current.contains(alvo)) setMenuOpen(false);
       if (notifRef.current && !notifRef.current.contains(alvo)) setNotifOpen(false);
     };
     document.addEventListener('mousedown', onClick);
@@ -50,12 +43,6 @@ export function TopBar({ onSair }: { onSair: () => void }) {
       document.removeEventListener('touchstart', onClick);
     };
   }, []);
-
-  const restaurar = () => {
-    setDemoOpen(false);
-    restaurarDemo();
-    onSair();
-  };
 
   return (
     <header className="surface sticky top-0 z-30 mb-4 flex items-center gap-1.5 rounded-b-2xl px-3 py-2.5 sm:gap-2 sm:px-4 sm:py-3">
@@ -116,71 +103,17 @@ export function TopBar({ onSair }: { onSair: () => void }) {
         )}
       </div>
 
-      <div className="relative" ref={menuRef}>
-        <button
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label="Menu de perfil"
-          aria-expanded={menuOpen}
-          className="surface-soft flex items-center gap-1 rounded-full px-2.5 py-2 text-xs font-bold text-strong sm:px-3 sm:text-sm"
-        >
-          {perfilNomes[state.perfilAtivo]}
-          <ChevronDown size={14} />
-        </button>
-        {menuOpen && (
-          <div
-            className="surface fixed right-2 top-14 w-56 rounded-2xl p-2 sm:absolute sm:right-0 sm:top-11"
-            style={{ background: 'var(--bg-page)' }}
-          >
-            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-muted">
-              Trocar perfil
-            </p>
-            {(['morador', 'sindico', 'portaria'] as Profile[]).map((p) => (
-              <button
-                key={p}
-                onClick={() => {
-                  setMenuOpen(false);
-                  if (p !== state.perfilAtivo) setPerfil(p);
-                }}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-body hover:bg-[rgba(254,78,2,0.1)]"
-              >
-                {perfilNomes[p]}
-                {state.perfilAtivo === p && <Check size={15} className="text-[#FE4E02]" />}
-              </button>
-            ))}
-            <div className="my-1 border-t border-soft" />
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-                setDemoOpen(true);
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-body hover:bg-[rgba(254,78,2,0.1)]"
-            >
-              <RotateCcw size={15} /> Restaurar dados demo
-            </button>
-            <button
-              onClick={onSair}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-body hover:bg-[rgba(254,78,2,0.1)]"
-            >
-              <LogOut size={15} /> Sair
-            </button>
-          </div>
-        )}
-      </div>
-
-      <Modal open={demoOpen} onClose={() => setDemoOpen(false)} title="Restaurar dados demo">
-        <p className="text-sm text-body">
-          Isso apaga todas as alterações feitas e recarrega os dados de demonstração originais. Deseja
-          continuar?
-        </p>
-        <div className="mt-4 flex gap-2">
-          <Button variant="secondary" className="flex-1" onClick={() => setDemoOpen(false)}>
-            Cancelar
-          </Button>
-          <Button variant="danger" className="flex-1" onClick={restaurar}>
-            Restaurar
-          </Button>
-        </div>
-      </Modal>
+      <span className="surface-soft rounded-full px-2.5 py-2 text-xs font-bold text-strong sm:px-3 sm:text-sm">
+        {perfilNomes[state.perfilAtivo]}
+      </span>
+      <button
+        onClick={onSair}
+        aria-label="Sair da conta"
+        title="Sair"
+        className="rounded-full p-2 text-strong hover:text-[#FE4E02]"
+      >
+        <LogOut size={18} />
+      </button>
     </header>
   );
 }
