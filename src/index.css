@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --domu-orange: #fe4e02;
+  --domu-orange-accent: #ea5c29;
+  --domu-black-1: #010101;
+  --domu-black-2: #1d1d1b;
+  --domu-black-3: #000100;
+  --domu-cream-1: #fbf1cd;
+  --domu-cream-2: #fcfcf4;
+
+  /* Light theme surfaces & text (never pure white/black) */
+  --bg-page: var(--domu-cream-2);
+  --bg-surface: rgba(255, 255, 255, 0.9);
+  --bg-surface-soft: rgba(251, 241, 205, 0.6);
+  --bg-inset: rgba(1, 1, 1, 0.06);
+  --text-strong: rgba(1, 1, 1, 0.9);
+  --text-body: rgba(1, 1, 1, 0.8);
+  --text-muted: rgba(1, 1, 1, 0.7);
+  --border-soft: rgba(1, 1, 1, 0.1);
+  --card-shadow: 0 3px 5px rgba(234, 92, 41, 0.18);
+}
+
+.dark {
+  --bg-page: var(--domu-black-2);
+  --bg-surface: rgba(255, 255, 255, 0.08);
+  --bg-surface-soft: rgba(255, 255, 255, 0.05);
+  --bg-inset: rgba(255, 255, 255, 0.09);
+  --text-strong: rgba(255, 255, 255, 0.9);
+  --text-body: rgba(255, 255, 255, 0.8);
+  --text-muted: rgba(255, 255, 255, 0.7);
+  --border-soft: rgba(255, 255, 255, 0.1);
+  --card-shadow: 0 3px 5px rgba(234, 92, 41, 0.18);
+}
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+.surface {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--card-shadow);
+}
+
+.surface-soft {
+  background-color: var(--bg-surface-soft);
+  border: 1px solid var(--border-soft);
+}
+
+.inset {
+  background-color: var(--bg-inset);
+}
+
+.text-strong { color: var(--text-strong); }
+.text-body { color: var(--text-body); }
+.text-muted { color: var(--text-muted); }
+.border-soft { border-color: var(--border-soft); }
+
+.domu-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--card-shadow);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.domu-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(234, 92, 41, 0.24);
+}
+
+.domu-decor {
+  position: absolute;
+  right: -14px;
+  bottom: -14px;
+  width: 96px;
+  height: 96px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role='button']:focus-visible,
+[role='dialog']:focus-visible {
+  outline: 2px solid var(--domu-orange);
+  outline-offset: 2px;
+}
+
+/* Hide number input spinners */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,215 @@
+import { useState } from 'react';
+import { Home, Wallet, CalendarDays, MessageSquare, LayoutDashboard } from 'lucide-react';
+import { useStore } from '../store';
+import { TopBar } from './TopBar';
+import ResidentDashboard from './ResidentDashboard';
+import Financeiro from './Financeiro';
+import Reservas from './Reservas';
+import Encomendas from './Encomendas';
+import Visitantes from './Visitantes';
+import Veiculos from './Veiculos';
+import Ocorrencias from './Ocorrencias';
+import Programacao from './Programacao';
+import SindicoPainel from './SindicoPainel';
+import GestaoMoradores from './GestaoMoradores';
+import Colaboradores from './Colaboradores';
+import SindicoVisitantes from './SindicoVisitantes';
+import EmitirBoletos from './EmitirBoletos';
+import SindicoOcorrencias from './SindicoOcorrencias';
+import GerenciarProgramacao from './GerenciarProgramacao';
+import Chat from './Chat';
+import PortariaEncomendas from './PortariaEncomendas';
+import PortariaVisitantes from './PortariaVisitantes';
+import ConsultaRapida from './ConsultaRapida';
+import type { Profile } from '../types';
+
+interface NavItem {
+  id: string;
+  label: string;
+  icon: typeof Home;
+}
+
+const NAV: Record<Profile, NavItem[]> = {
+  morador: [
+    { id: 'inicio', label: 'Início', icon: Home },
+    { id: 'encomendas', label: 'Entregas', icon: Home },
+    { id: 'reservas', label: 'Reservas', icon: CalendarDays },
+    { id: 'financeiro', label: 'Financeiro', icon: Wallet },
+  ],
+  sindico: [
+    { id: 'painel', label: 'Painel', icon: LayoutDashboard },
+    { id: 'ocorrencias', label: 'Ocorrências', icon: MessageSquare },
+    { id: 'boletos', label: 'Boletos', icon: Wallet },
+    { id: 'chat-portaria', label: 'Portaria', icon: MessageSquare },
+  ],
+  portaria: [
+    { id: 'p-encomendas', label: 'Encomendas', icon: Home },
+    { id: 'p-visitantes', label: 'Visitantes', icon: Home },
+    { id: 'p-consulta', label: 'Consulta', icon: Home },
+    { id: 'chat-portaria', label: 'Síndico', icon: MessageSquare },
+  ],
+};
+
+const MAIS: Record<Profile, { id: string; label: string }[]> = {
+  morador: [
+    { id: 'visitantes', label: 'Visitantes' },
+    { id: 'veiculos', label: 'Meus veículos' },
+    { id: 'ocorrencias', label: 'Ocorrências' },
+    { id: 'programacao', label: 'Programação' },
+  ],
+  sindico: [
+    { id: 'moradores', label: 'Moradores' },
+    { id: 'colaboradores', label: 'Colaboradores' },
+    { id: 's-visitantes', label: 'Visitantes' },
+    { id: 's-programacao', label: 'Programação' },
+    { id: 'chat-morador', label: 'Falar com morador' },
+  ],
+  portaria: [],
+};
+
+export default function AppShell({ onSair }: { onSair: () => void }) {
+  const { state } = useStore();
+  const [tab, setTab] = useState('inicio');
+
+  const perfil = state.perfilAtivo;
+
+  // Reset tab when switching profiles
+  const tabInicial: Record<Profile, string> = {
+    morador: 'inicio',
+    sindico: 'painel',
+    portaria: 'p-encomendas',
+  };
+  const abaAtual = NAV[perfil].some((n) => n.id === tab) || MAIS[perfil].some((m) => m.id === tab)
+    ? tab
+    : tabInicial[perfil];
+
+  const go = (id: string) => setTab(id);
+
+  const render = () => {
+    if (perfil === 'morador') {
+      switch (abaAtual) {
+        case 'inicio':
+          return <ResidentDashboard go={go} />;
+        case 'financeiro':
+          return <Financeiro />;
+        case 'reservas':
+          return <Reservas />;
+        case 'encomendas':
+          return <Encomendas />;
+        case 'visitantes':
+          return <Visitantes />;
+        case 'veiculos':
+          return <Veiculos />;
+        case 'ocorrencias':
+          return <Ocorrencias />;
+        case 'programacao':
+          return <Programacao />;
+        default:
+          return <ResidentDashboard go={go} />;
+      }
+    }
+    if (perfil === 'sindico') {
+      switch (abaAtual) {
+        case 'painel':
+          return <SindicoPainel go={go} />;
+        case 'moradores':
+          return <GestaoMoradores />;
+        case 'colaboradores':
+          return <Colaboradores />;
+        case 's-visitantes':
+          return <SindicoVisitantes />;
+        case 'boletos':
+          return <EmitirBoletos />;
+        case 'ocorrencias':
+          return <SindicoOcorrencias />;
+        case 's-programacao':
+          return <GerenciarProgramacao />;
+        case 'chat-portaria':
+          return (
+            <Chat
+              canal="chatSindicoPortaria"
+              titulo="Chat com a Portaria"
+              subtitulo="Assuntos operacionais do condomínio"
+              meuPerfil="sindico"
+            />
+          );
+        case 'chat-morador':
+          return (
+            <Chat
+              canal="chatSindicoMorador"
+              titulo="Chat com Moradores"
+              subtitulo="Canal direto com a unidade do morador atual"
+              meuPerfil="sindico"
+            />
+          );
+        default:
+          return <SindicoPainel go={go} />;
+      }
+    }
+    switch (abaAtual) {
+      case 'p-encomendas':
+        return <PortariaEncomendas />;
+      case 'p-visitantes':
+        return <PortariaVisitantes />;
+      case 'p-consulta':
+        return <ConsultaRapida />;
+      case 'chat-portaria':
+        return (
+          <Chat
+            canal="chatSindicoPortaria"
+            titulo="Chat com o Síndico"
+            subtitulo="Reporte urgências e tire dúvidas"
+            meuPerfil="portaria"
+          />
+        );
+      default:
+        return <PortariaEncomendas />;
+    }
+  };
+
+  const iconFor = (id: string): typeof Home => {
+    const item = NAV[perfil].find((n) => n.id === id);
+    return item?.icon ?? Home;
+  };
+
+  return (
+    <div className="mx-auto min-h-screen w-full max-w-lg px-4 pb-24 lg:max-w-3xl">
+      <TopBar onSair={onSair} />
+      <main>{render()}</main>
+
+      <nav
+        className="surface fixed bottom-4 left-1/2 z-30 flex w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 items-center justify-around rounded-2xl px-2 py-2"
+        aria-label="Navegação principal"
+      >
+        {NAV[perfil].map((item) => {
+          const Icon = item.icon;
+          const ativo = abaAtual === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => go(item.id)}
+              aria-label={item.label}
+              aria-current={ativo ? 'page' : undefined}
+              className="flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold"
+              style={{ color: ativo ? '#FE4E02' : 'var(--text-muted)' }}
+            >
+              <Icon size={20} />
+              {item.label}
+            </button>
+          );
+        })}
+        {MAIS[perfil].length > 0 && (
+          <button
+            onClick={() => go(MAIS[perfil][0].id)}
+            aria-label="Mais funcionalidades"
+            className="flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold"
+            style={{ color: MAIS[perfil].some((m) => m.id === abaAtual) ? '#FE4E02' : 'var(--text-muted)' }}
+          >
+            <Home size={20} />
+            Mais
+          </button>
+        )}
+      </nav>
+    </div>
+  );
+}
